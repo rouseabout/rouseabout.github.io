@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="cn-ZH">
+<head>
+<title>食物词典</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script type="text/javascript">
+var start = 0;
+function search(this_start){
+    var e = $("#search").val().trim().toLowerCase();
+    var results = '';
+    var count = 0;
+    var next_start = 0;
+    if (e.length) {
+        for (var i = this_start; i < entry.length; i++) {
+            var name = entry[i][0];
+            var pinyin = entry[i][1];
+            var pinyin2 = pinyin.normalize("NFD").replace(/[\u0300-\u036f ]/g, "");
+            if (name.toLowerCase().search('^' + e) >= 0 || pinyin2.toLowerCase().search('^' + e) >= 0) {
+                if (count > 100) {
+                } else if (count == 100) {
+                    next_start = i;
+                } else {
+                var cats = entry[i][2];
+                var imgs = entry[i][3];
+                results += "<hr/><h2>" + name + "</h2><p>拼音：" + pinyin + "<br/>类型：";
+                for (var j = 0; j < cats.length; j++) {
+                    var cat_idx = cats[j][0];
+                    var cat_count = cats[j][1];
+                    if (j > 0)
+                        results += "、";
+                    results += category[cat_idx];
+                    if (cat_count > 1)
+                        results += " (" + cat_count + ")";
+                }
+                results += "</p>";
+                results += "<div class=\"row row no-gutters\">";
+                for (var j = 0; j < imgs.length; j++) {
+                    var path = "img/" + imgs[j] + ".webp";
+                    results += "<div class=\"col-4 d-flex align-items-center justify-content-center\">";
+                    results += "<a data-toggle=\"modal\" href=\"#popup\" data-name=\"" + name + "\" data-image=\"" + imgs[j] + "\"><img class=\"img-thumbnail\" loading=\"lazy\" src=\"" + path + "\"/></a>";
+                    results += "</div>";
+                }
+                results += "</div>";
+                }
+                count++;
+            }
+        }
+    }
+
+    if (!this_start)
+        results = "<br/><div class=\"row text-center\"><div class=\"col\"><i>" + count + "条搜索结果" + "</i></div></div>" + results;
+
+    if (next_start > 0)
+        $("#next").removeClass('d-none');
+    else
+        $("#next").addClass('d-none');
+
+    start = next_start;
+    return results;
+}
+function first(){
+    $("#results").html(search(0));
+}
+function next()
+{
+    $("#results").append(search(start));
+}
+</script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+<div class="input-group">
+<a class="navbar-brand" href="#">食物词典</a>
+<input id="search" class="form-control mr-sm-2" type="search" placeholder="菜名。可以用拼音，可以用regex，比如：.*四季豆" aria-label="搜索" onkeyup="first();">
+<button type="button" class="btn btn-primary" data-mdb-ripple-init onclick="first();">搜索</button>
+</div>
+</nav>
+<div class="container mt-5" id="results">
+</div>
+<div class="container mt-5 text-center d-none" id="next">
+<p><button type="button" class="btn btn-primary" onclick="next();">继续搜索</button></p>
+</div>
+<div class="modal" id="popup" tabindex="-1" aria-labelledby="popup-title" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="popup-title"></h2>
+<button type="button" class="close" data-dismiss="modal" aria-label="关闭"><span aria-hidden="true">&times;</span></button>
+</div>
+<div class="modal-body align-items-center">
+<img id="popup-img"/>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-primary" data-dismiss="modal">关闭</button>
+</div>
+</div>
+</div>
+</div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="shiwucidian.js"></script>
+<script type="text/javascript">
+$('#popup').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var name = button.data('name');
+    var img_no = button.data('image');
+    $("#popup-title").html(name);
+    $("#popup-img").attr("src", "img/" + img_no + ".webp");
+})
+</script>
+</body>
+</html>
